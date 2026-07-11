@@ -12,6 +12,7 @@ export interface WorkflowNode {
   agent_id: string
   label?: string
   input_mapping?: Record<string, string>
+  position?: { x: number; y: number }
 }
 
 export interface WorkflowEdge {
