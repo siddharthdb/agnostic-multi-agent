@@ -1,0 +1,24 @@
+{
+  "name": "CAM",
+  "description": "Customer Account Manager (stub)",
+  "protocol": "REST",
+  "endpoint_url": "http://localhost:9001/invoke",
+  "auth_type": "none",
+  "auth_config": {},
+  "input_schema": {
+    "type": "object",
+    "required": ["customer_id"],
+    "properties": {
+      "customer_id": { "type": "string" }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "status": { "type": "string" },
+      "account_tier": { "type": "string" }
+    }
+  },
+  "capability_tags": ["account", "customer-lookup"],
+  "health_check_url": "http://localhost:9001/health"
+}

@@ -1,0 +1,25 @@
+{
+  "name": "BSA",
+  "description": "Booking Service Agent (stub)",
+  "protocol": "REST",
+  "endpoint_url": "http://localhost:9003/invoke",
+  "auth_type": "none",
+  "auth_config": {},
+  "input_schema": {
+    "type": "object",
+    "required": ["customer_id"],
+    "properties": {
+      "customer_id": { "type": "string" },
+      "risk_level": { "type": "string" }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "booking_status": { "type": "string" },
+      "reference": { "type": "string" }
+    }
+  },
+  "capability_tags": ["booking"],
+  "health_check_url": "http://localhost:9003/health"
+}

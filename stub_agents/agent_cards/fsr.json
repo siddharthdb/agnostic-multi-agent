@@ -1,0 +1,25 @@
+{
+  "name": "FSR",
+  "description": "Fraud/Risk Scoring (stub)",
+  "protocol": "REST",
+  "endpoint_url": "http://localhost:9002/invoke",
+  "auth_type": "none",
+  "auth_config": {},
+  "input_schema": {
+    "type": "object",
+    "required": ["customer_id"],
+    "properties": {
+      "customer_id": { "type": "string" },
+      "account_tier": { "type": "string" }
+    }
+  },
+  "output_schema": {
+    "type": "object",
+    "properties": {
+      "risk_score": { "type": "number" },
+      "risk_level": { "type": "string" }
+    }
+  },
+  "capability_tags": ["risk", "fraud"],
+  "health_check_url": "http://localhost:9002/health"
+}
