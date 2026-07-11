@@ -93,4 +93,7 @@ async def stream_execution_events(
 
 
 def _format_sse(event: dict[str, Any]) -> str:
-    return f"event: {event['event_type']}\ndata: {json.dumps(event)}\n\n"
+    # No `event:` line -- event_type already travels inside the JSON payload,
+    # so the client can dispatch on it via plain EventSource.onmessage instead
+    # of registering an addEventListener per event type name.
+    return f"data: {json.dumps(event)}\n\n"
