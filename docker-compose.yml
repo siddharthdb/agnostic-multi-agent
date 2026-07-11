@@ -1,0 +1,71 @@
+x-stub-build: &stub-build
+  build:
+    context: ./stub_agents
+
+services:
+  cam-stub:
+    <<: *stub-build
+    command: uv run uvicorn cam_stub.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "9001:8000"
+
+  fsr-stub:
+    <<: *stub-build
+    command: uv run uvicorn fsr_stub.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "9002:8000"
+
+  bsa-stub:
+    <<: *stub-build
+    command: uv run uvicorn bsa_stub.main:app --host 0.0.0.0 --port 8000
+    ports:
+      - "9003:8000"
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: sqlite:////app/data/dev.db
+      CORS_ORIGINS: '["http://localhost:5173"]'
+    volumes:
+      - backend_data:/app/data
+    ports:
+      - "8000:8000"
+    depends_on:
+      - cam-stub
+      - fsr-stub
+      - bsa-stub
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        VITE_API_BASE_URL: http://localhost:8000
+    ports:
+      - "5173:80"
+    depends_on:
+      - backend
+
+  seed:
+    image: python:3.14-slim
+    working_dir: /repo
+    volumes:
+      - .:/repo:ro
+    environment:
+      CAM_BASE_URL: http://cam-stub:8000
+      FSR_BASE_URL: http://fsr-stub:8000
+      BSA_BASE_URL: http://bsa-stub:8000
+    command: python scripts/seed_agents.py http://backend:8000
+    depends_on:
+      backend:
+        condition: service_healthy
+      cam-stub:
+        condition: service_healthy
+      fsr-stub:
+        condition: service_healthy
+      bsa-stub:
+        condition: service_healthy
+    restart: "no"
+
+volumes:
+  backend_data:
