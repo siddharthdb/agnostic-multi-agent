@@ -13,7 +13,7 @@ from app.core.exceptions import (
 )
 from app.db import create_db_and_tables
 from app.models import Agent, Execution, ExecutionEvent, Workflow  # noqa: F401  (registers tables)
-from app.routers import agents, workflows
+from app.routers import agents, executions, workflows
 
 
 @asynccontextmanager
@@ -55,6 +55,7 @@ def handle_unsupported_protocol(request: Request, exc: UnsupportedProtocolError)
 
 app.include_router(agents.router)
 app.include_router(workflows.router)
+app.include_router(executions.router)
 
 
 @app.get("/health")

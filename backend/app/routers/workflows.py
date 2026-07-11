@@ -2,8 +2,15 @@ from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
 from app.db import get_session
-from app.schemas.workflow import ValidationResult, WorkflowCreate, WorkflowRead, WorkflowUpdate
-from app.services import workflow_service
+from app.schemas.execution import ExecutionRead
+from app.schemas.workflow import (
+    ExecuteRequest,
+    ValidationResult,
+    WorkflowCreate,
+    WorkflowRead,
+    WorkflowUpdate,
+)
+from app.services import execution_service, workflow_service
 
 router = APIRouter(prefix="/workflows", tags=["workflows"])
 
@@ -41,3 +48,10 @@ def delete_workflow(workflow_id: str, session: Session = Depends(get_session)) -
 def validate_workflow(workflow_id: str, session: Session = Depends(get_session)) -> ValidationResult:
     workflow = workflow_service.get_workflow(session, workflow_id)
     return workflow_service.validate_workflow_definition(session, workflow.definition)
+
+
+@router.post("/{workflow_id}/execute", response_model=ExecutionRead, status_code=202)
+async def execute_workflow(
+    workflow_id: str, data: ExecuteRequest, session: Session = Depends(get_session)
+) -> ExecutionRead:
+    return await execution_service.start_execution(session, workflow_id, data.input_payload)
