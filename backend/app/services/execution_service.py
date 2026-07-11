@@ -216,3 +216,31 @@ def request_cancel(session: Session, execution_id: str) -> Execution:
         session.commit()
         session.refresh(execution)
     return execution
+
+
+def sweep_stale_executions() -> int:
+    """Startup-time cleanup: RUNNING_TASKS is always empty right after a
+    process restart, so any execution still QUEUED/RUNNING at startup could
+    not have a live task backing it -- it was interrupted by a crash or
+    restart. Mark it FAILED instead of leaving it stuck forever."""
+    with Session(engine) as session:
+        stale = list(
+            session.exec(
+                select(Execution).where(
+                    Execution.status.in_([ExecutionStatus.QUEUED, ExecutionStatus.RUNNING])
+                )
+            ).all()
+        )
+        for execution in stale:
+            execution.status = ExecutionStatus.FAILED
+            execution.ended_at = utcnow()
+            session.add(execution)
+        session.commit()
+
+        for execution in stale:
+            seq = _next_seq(session, execution.id)
+            _emit_event(
+                session, execution.id, seq, "execution_failed", None,
+                {"error": "execution interrupted by restart"},
+            )
+    return len(stale)

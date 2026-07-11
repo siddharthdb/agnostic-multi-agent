@@ -14,11 +14,13 @@ from app.core.exceptions import (
 from app.db import create_db_and_tables
 from app.models import Agent, Execution, ExecutionEvent, Workflow  # noqa: F401  (registers tables)
 from app.routers import agents, executions, workflows
+from app.services.execution_service import sweep_stale_executions
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     create_db_and_tables()
+    sweep_stale_executions()
     yield
 
 
